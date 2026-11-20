@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olimpiadas Navideñas de la Oficina</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Outfit & Press Start 2P -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        xmas: {
+                            red: '#D62828',
+                            darkred: '#800F2F',
+                            green: '#1B4332',
+                            lightgreen: '#2D6A4F',
+                            gold: '#FFB703',
+                            amber: '#FB8500',
+                            cream: '#FEFAE0',
+                            snow: '#F8F9FA'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        arcade: ['"Press Start 2P"', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Animación y Fondo de Nieve */
+        canvas#snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        body {
+            background: linear-gradient(135deg, #09131d 0%, #112d22 50%, #09131d 100%);
+            color: #FEFAE0;
+            min-height: 100vh;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .gold-border {
+            border: 2px solid #FFB703;
+            box-shadow: 0 0 20px rgba(255, 183, 3, 0.35);
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #FFB703;
+            border-radius: 4px;
+        }
+
+        /* Botones animaciones */
+        .btn-xmas {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-xmas:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(214, 40, 40, 0.5);
+        }
+        .btn-xmas:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        /* Canvas de Rompeladrillos */
+        canvas.game-canvas {
+            background: radial-gradient(circle, #1a2e26 0%, #0d1712 100%);
+            border-radius: 1rem;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px rgba(255, 183, 3, 0.2);
+        }
+
+        /* Grid Sopa de Letras (14x14) */
+        .wordsearch-grid {
+            display: grid;
+            grid-template-columns: repeat(14, minmax(0, 1fr));
+            gap: 2px;
+            user-select: none;
+            touch-action: none;
+        }
+        .word-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            background: rgba(30, 41, 59, 0.9);
+            color: #FEFAE0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+        @media (min-width: 640px) {
+            .word-cell { font-size: 1.05rem; }
+        }
+        .word-cell.selected {
+            background: #FFB703 !important;
+            color: #0F172A !important;
+            transform: scale(1.08);
+            font-weight: 900;
+        }
+        .word-cell.found {
+            background: #2D6A4F !important;
+            color: #FFFFFF !important;
+            border-color: #52B788;
+        }
+        .word-item.found-word {
+            text-decoration: line-through;
+            opacity: 0.45;
+            color: #52B788;
+        }
+    </style>
+</head>
+<body class="relative flex flex-col min-h-screen select-none">
+    <!-- Nieve Animada -->
+    <canvas id="snow-canvas"></canvas>
+
+    <div class="relative z-10 flex flex-col flex-grow max-w-6xl mx-auto w-full p-4 md:p-6">
+
+        <!-- ENCABEZADO PRINCIPAL -->
+        <header id="main-header" class="glass-card rounded-2xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 gold-border">
+            <div class="flex items-center gap-3">
+                <div class="bg-xmas-red p-3 rounded-xl shadow-md text-2xl text-white animate-bounce">
+                    🎄
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-wide text-white flex items-center gap-2">
+                        OLIMPIADAS NAVIDEÑAS
+                        <span class="text-xs bg-xmas-gold text-slate-900 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Oficina 2024</span>
+                    </h1>
+                    <p class="text-xs text-emerald-300">¡Compite con tus compañeros por los mejores premios!</p>
+                </div>
+            </div>
+
+            <!-- Datos del Usuario Registrado -->
+            <div id="user-header-info" class="hidden flex items-center gap-4 bg-slate-900/80 p-2.5 px-4 rounded-xl border border-white/10">
+                <div class="text-3xl bg-emerald-800/80 p-1.5 rounded-full border border-emerald-400/30" id="header-avatar">🎅</div>
+                <div class="text-left">
+                    <div class="flex items-center gap-2">
+                        <span id="header-name" class="font-bold text-white text-sm">Cargando...</span>
+                    </div>
+                    <div class="text-xs text-amber-400 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-star text-xmas-gold"></i>
+                        <span id="header-score" class="text-sm font-black text-white">0</span> pts totales
+                    </div>
+                </div>
+                <button onclick="openProfileModal()" title="Editar Perfil" class="text-slate-400 hover:text-white transition p-2 rounded-lg hover:bg-white/10 ml-2">
+                    <i class="fa-solid fa-user-gear"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="flex-grow flex flex-col justify-center">
+
+            <!-- DASHBOARD DE JUEGOS Y RANKING -->
+            <div id="view-dashboard" class="space-y-6">
+
+                <!-- BANNER CON CUENTA REGRESIVA NAVIDEÑA -->
+                <div class="glass-card rounded-2xl p-6 text-center relative overflow-hidden bg-gradient-to-r from-xmas-darkred/50 via-slate-900/90 to-xmas-green/50 border border-amber-500/30">
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2">¡Gran Torneo Festivo de la Oficina! 🎁</h2>
+                    <p class="text-sm md:text-base text-slate-300 max-w-2xl mx-auto mb-5">
+                        Juega cada reto para sumar puntos a tu perfil personal. ¡Quienes lideren la tabla de posiciones al finalizar la jornada ganarán los premios especiales!
+                    </p>
+
+                    <!-- WIDGET CUENTA REGRESIVA -->
+                    <div class="bg-slate-950/85 border border-xmas-gold/40 rounded-2xl p-4 max-w-xl mx-auto shadow-2xl backdrop-blur-md">
+                        <div class="text-xs uppercase tracking-widest text-amber-300 font-extrabold mb-3 flex items-center justify-center gap-2">
+                            <span>✨</span> CUENTA REGRESIVA PARA NAVIDAD <span>🎅</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 sm:gap-4 text-center">
+                            <div class="bg-slate-900/90 border border-white/10 rounded-xl p-2 sm:p-3">
+                                <span id="cd-days" class="font-black text-2xl sm:text-3xl text-xmas-gold block font-mono">00</span>
+                                <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">Días</span>
+                            </div>
+                            <div class="bg-slate-900/90 border border-white/10 rounded-xl p-2 sm:p-3">
+                                <span id="cd-hours" class="font-black text-2xl sm:text-3xl text-white block font-mono">00</span>
+                                <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">Horas</span>
+                            </div>
+                            <div class="bg-slate-900/90 border border-white/10 rounded-xl p-2 sm:p-3">
+                                <span id="cd-minutes" class="font-black text-2xl sm:text-3xl text-emerald-400 block font-mono">00</span>
+                                <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">Minutos</span>
+                            </div>
+                            <div class="bg-slate-900/90 border border-white/10 rounded-xl p-2 sm:p-3">
+                                <span id="cd-seconds" class="font-black text-2xl sm:text-3xl text-xmas-red block font-mono">00</span>
+                                <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">Segundos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MINIJUEGOS (CARDS) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <!-- Minijuego 1: Sopa de Letras -->
+                    <div class="glass-card rounded-2xl p-5 flex flex-col justify-between hover:border-xmas-gold/50 transition-all duration-300 group">
+                        <div>
+                            <div class="h-40 rounded-xl bg-gradient-to-br from-red-950/70 to-slate-900 flex items-center justify-center text-6xl mb-4 group-hover:scale-105 transition-transform relative overflow-hidden border border-white/5">
+                                <span class="absolute top-2 right-2 text-xs bg-red-600 text-white font-bold px-2.5 py-0.5 rounded-full">14x14 Difícil</span>
+                                🔤❄️
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white mb-1">Sopa de Letras Navideña</h3>
+                            <p class="text-xs text-slate-300 mb-4">Encuentra 10 palabras ocultas en direcciones horizontales, verticales, diagonales y reversas. Multiplica tus puntos con velocidad.</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center text-xs text-amber-300 font-semibold mb-3 bg-slate-900/50 p-2.5 rounded-lg">
+                                <span>Mi mejor puntaje:</span>
+                                <span id="record-game1" class="text-white font-bold">0 pts</span>
+                            </div>
+                            <button onclick="startGame(1)" class="btn-xmas w-full py-2.5 bg-xmas-red hover:bg-red-600 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg">
+                                <i class="fa-solid fa-play"></i> Jugar Sopa de Letras
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Minijuego 2: Rompeladrillos -->
+                    <div class="glass-card rounded-2xl p-5 flex flex-col justify-between hover:border-xmas-gold/50 transition-all duration-300 group">
+                        <div>
+                            <div class="h-40 rounded-xl bg-gradient-to-br from-emerald-950/70 to-slate-900 flex items-center justify-center text-6xl mb-4 group-hover:scale-105 transition-transform relative overflow-hidden border border-white/5">
+                                <span class="absolute top-2 right-2 text-xs bg-emerald-600 text-white font-bold px-2.5 py-0.5 rounded-full">Niveles Progresivos</span>
+                                🎄🔮
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white mb-1">Rompeladrillos de Nochebuena</h3>
+                            <p class="text-xs text-slate-300 mb-4">Destruye la estructura en forma de Árbol de Navidad con la esfera mágica. Supera niveles continuos para aumentar la velocidad y los puntos.</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center text-xs text-amber-300 font-semibold mb-3 bg-slate-900/50 p-2.5 rounded-lg">
+                                <span>Mi mejor puntaje:</span>
+                                <span id="record-game2" class="text-white font-bold">0 pts</span>
+                            </div>
+                            <button onclick="startGame(2)" class="btn-xmas w-full py-2.5 bg-xmas-lightgreen hover:bg-emerald-600 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg">
+                                <i class="fa-solid fa-play"></i> Jugar Rompeladrillos
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Minijuego 3: Trivia -->
+                    <div class="glass-card rounded-2xl p-5 flex flex-col justify-between hover:border-xmas-gold/50 transition-all duration-300 group">
+                        <div>
+                            <div class="h-40 rounded-xl bg-gradient-to-br from-amber-950/70 to-slate-900 flex items-center justify-center text-6xl mb-4 group-hover:scale-105 transition-transform relative overflow-hidden border border-white/5">
+                                <span class="absolute top-2 right-2 text-xs bg-amber-600 text-white font-bold px-2.5 py-0.5 rounded-full">10 Preguntas</span>
+                                🧠🎅
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white mb-1">Trivia Festiva & Oficina</h3>
+                            <p class="text-xs text-slate-300 mb-4">Responde 10 preguntas festivas contra reloj. Consigue bonus por responder rápidamente y mantener rachas correctas.</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center text-xs text-amber-300 font-semibold mb-3 bg-slate-900/50 p-2.5 rounded-lg">
+                                <span>Mi mejor puntaje:</span>
+                                <span id="record-game3" class="text-white font-bold">0 pts</span>
+                            </div>
+                            <button onclick="startGame(3)" class="btn-xmas w-full py-2.5 bg-xmas-gold hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg">
+                                <i class="fa-solid fa-play"></i> Jugar Trivia
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TABLA DE POSICIONES GENERAL -->
+                <div class="glass-card rounded-2xl p-6 gold-border mt-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-trophy text-3xl text-xmas-gold animate-bounce"></i>
+                            <div>
+                                <h3 class="text-xl font-black text-white">Tabla de Posiciones General</h3>
+                                <p class="text-xs text-slate-300">Ranking en vivo según la suma total de los 3 minijuegos</p>
+                            </div>
+                        </div>
+                        <!-- Botones de Exportación (Sin botón de reinicio) -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="exportLeaderboardCSV()" class="bg-emerald-800 hover:bg-emerald-700 text-white text-xs px-3.5 py-2 rounded-xl font-bold border border-emerald-400/30 flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-file-csv"></i> Exportar CSV
+                            </button>
+                            <button onclick="exportLeaderboardJSON()" class="bg-amber-700 hover:bg-amber-600 text-white text-xs px-3.5 py-2 rounded-xl font-bold border border-amber-400/30 flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-file-code"></i> Exportar JSON
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Puntajes -->
+                    <div class="overflow-x-auto custom-scroll max-h-96 pr-1">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-900/90 text-amber-300 font-bold uppercase tracking-wider sticky top-0 border-b border-white/10">
+                                <tr>
+                                    <th class="p-3.5 rounded-l-lg">Lugar</th>
+                                    <th class="p-3.5">Compañero</th>
+                                    <th class="p-3.5 text-center">Sopa Letras</th>
+                                    <th class="p-3.5 text-center">Rompeladrillos</th>
+                                    <th class="p-3.5 text-center">Trivia</th>
+                                    <th class="p-3.5 text-right rounded-r-lg">Puntaje Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body" class="divide-y divide-white/10 text-slate-200">
+                                <!-- Filas renderizadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW: VISTA DE JUEGO -->
+            <div id="view-game" class="hidden flex-col items-center justify-center">
+                <div class="glass-card rounded-2xl p-4 md:p-6 w-full max-w-2xl text-center relative gold-border">
+                    
+                    <!-- Barra Superior de Control del Juego -->
+                    <div class="flex justify-between items-center mb-4 bg-slate-900/80 p-3 rounded-xl border border-white/10">
+                        <button onclick="exitGame()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3.5 py-2 rounded-lg font-bold flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-arrow-left"></i> Salir al Menú
+                        </button>
+                        <span id="game-title" class="font-extrabold text-amber-300 text-sm md:text-base">Nombre del Juego</span>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 block uppercase font-bold">Puntos</span>
+                            <span id="game-score" class="font-black text-xl text-white font-mono">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Área de Juego -->
+                    <div id="game-container" class="relative flex justify-center items-center overflow-hidden min-h-[400px] w-full">
+                        <canvas id="main-game-canvas" width="500" height="400" class="game-canvas w-full max-w-[500px] h-auto hidden"></canvas>
+
+                        <!-- Área Dinámica HTML (Sopa de letras / Trivia) -->
+                        <div id="html-game-area" class="w-full flex flex-col items-center justify-center"></div>
+
+                        <!-- Capa de Overlay / Respuestas -->
+                        <div id="game-overlay" class="absolute inset-0 bg-slate-950/95 rounded-xl p-6 flex flex-col justify-center items-center text-center hidden">
+                            <!-- Inserción dinámica por JS -->
+                        </div>
+                    </div>
+
+                    <!-- Controles para Dispositivos Móviles (Rompeladrillos) -->
+                    <div id="mobile-controls" class="hidden grid-cols-2 gap-4 mt-4">
+                        <button id="btn-touch-left" class="bg-slate-800 hover:bg-slate-700 active:bg-amber-500 text-white p-4 rounded-xl font-bold text-xl active:scale-95 transition">
+                            ◀ Izquierda
+                        </button>
+                        <button id="btn-touch-right" class="bg-slate-800 hover:bg-slate-700 active:bg-amber-500 text-white p-4 rounded-xl font-bold text-xl active:scale-95 transition">
+                            Derecha ▶
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+
+        <!-- PIE DE PÁGINA -->
+        <footer class="mt-8 text-center text-xs text-slate-400 py-4 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <span>🎄 Olimpiadas Navideñas de la Oficina &copy; 2024</span>
+            <span class="text-emerald-400 font-semibold">¡Que tengan unas felices fiestas! 🎅</span>
+        </footer>
+    </div>
+
+    <!-- MODAL 1: REGISTRO / EDICIÓN DE PERFIL -->
+    <div id="modal-profile" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-md gold-border relative">
+            <h3 class="text-2xl font-black text-white text-center mb-1">¡Registro de Jugador! 🎅</h3>
+            <p class="text-xs text-slate-300 text-center mb-6">Ingresa tu nombre para identificarte en la tabla de posiciones.</p>
+
+            <form id="form-profile" onsubmit="saveProfile(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-1">Nombre o Apodo:</label>
+                    <input type="text" id="input-name" required placeholder="Ej: Carlos M." maxlength="22" oninput="validateNameInput()"
+                           class="w-full bg-slate-900 border border-white/20 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-xmas-gold">
+                    <!-- Mensaje de Advertencia de Duplicados -->
+                    <div id="duplicate-warning" class="hidden text-xs text-red-400 font-bold mt-1.5 flex items-center gap-1">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>Este nombre ya está registrado por un compañero. Por favor agrega un apellido o inicial.</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-amber-300 mb-2">Selecciona tu Avatar Navideño:</label>
+                    <div class="grid grid-cols-4 gap-2.5" id="avatar-selector">
+                        <!-- Botones de Avatar JS -->
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="btn-save-profile" class="btn-xmas w-full py-3 bg-xmas-red hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold rounded-xl shadow-lg text-sm">
+                        ¡Guardar y Comenzar! 🚀
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: FIN DEL JUEGO / RESULTADOS -->
+    <div id="modal-gameover" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-sm text-center gold-border relative">
+            <div class="text-5xl mb-2 animate-bounce" id="gameover-icon">🏆</div>
+            <h3 class="text-2xl font-black text-white mb-1" id="gameover-title">¡Juego Completado!</h3>
+            <p class="text-xs text-slate-300 mb-4" id="gameover-subtitle">Excelente aportación para tu puntaje acumulado</p>
+
+            <div class="bg-slate-900/90 rounded-xl p-4 mb-6 border border-white/10 space-y-2">
+                <div class="flex justify-between items-center text-xs text-slate-300">
+                    <span>Puntaje Logrado:</span>
+                    <span id="gameover-score" class="text-xl font-black text-xmas-gold font-mono">0</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-slate-300">
+                    <span>Tu Máximo Anterior:</span>
+                    <span id="gameover-prev-record" class="font-bold text-white font-mono">0</span>
+                </div>
+                <div id="gameover-newrecord-badge" class="hidden bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-md py-1 text-xs font-bold mt-2">
+                    🎉 ¡NUEVO RÉCORD PERSONAL! 🎉
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <button onclick="retryCurrentGame()" class="btn-xmas w-full py-2.5 bg-xmas-green hover:bg-emerald-600 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Jugar de Nuevo
+                </button>
+                <button onclick="closeGameOverAndGoMenu()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-bold text-sm">
+                    Ir al Menú Principal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        /* ==========================================
+           1. ESTADO GLOBAL & AVATARES
+        ========================================== */
+        const AVATARS = [
+            { emoji: '🎅', name: 'Santa' },
+            { emoji: '🦌', name: 'Reno' },
+            { emoji: '🧝', name: 'Duende' },
+            { emoji: '☃️', name: 'Muñeco de Nieve' },
+            { emoji: '🍪', name: 'Galleta' },
+            { emoji: '⭐️', name: 'Estrella' },
+            { emoji: '🎄', name: 'Árbol' },
+            { emoji: '🎁', name: 'Regalo' }
+        ];
+
+        let currentUser = null;
+        let selectedAvatar = '🎅';
+        let currentGameId = null;
+        let gameLoopReq = null;
+        let leaderboardData = [];
+
+        /* ==========================================
+           SINTETIZADOR DE SONIDO (WEB AUDIO API)
+        ========================================== */
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function playSynthSound(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+            try {
+                if (!audioCtx) audioCtx = new AudioCtx();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                // Audio no soportado o bloqueado
+            }
+        }
+
+        function playSuccessJingle() {
+            playSynthSound(523.25, 'triangle', 0.15, 0.12); // C5
+            setTimeout(() => playSynthSound(659.25, 'triangle', 0.15, 0.12), 120); // E5
+            setTimeout(() => playSynthSound(783.99, 'triangle', 0.25, 0.12), 240); // G5
+        }
+
+        function playWordFoundSound() {
+            playSynthSound(587.33, 'sine', 0.1, 0.15);
+            setTimeout(() => playSynthSound(880, 'sine', 0.2, 0.15), 90);
+        }
+
+        function playBrickHitSound() {
+            playSynthSound(350 + Math.random() * 200, 'square', 0.05, 0.08);
+        }
+
+        /* ==========================================
+           2. INICIALIZACIÓN
+        ========================================== */
+        window.onload = function() {
+            initSnowEffect();
+            initChristmasCountdown();
+            loadLocalStorageData();
+            renderAvatarSelector();
+
+            if (!currentUser) {
+                openProfileModal();
+            } else {
+                updateUIHeader();
+                renderLeaderboard();
+                updateDashboardScores();
+            }
+        };
+
+        /* CUENTA REGRESIVA NAVIDEÑA */
+        function initChristmasCountdown() {
+            function updateTimer() {
+                const now = new Date();
+                let currentYear = now.getFullYear();
+                let xmasTarget = new Date(currentYear, 11, 25, 0, 0, 0);
+
+                if (now > xmasTarget) {
+                    xmasTarget = new Date(currentYear + 1, 11, 25, 0, 0, 0);
+                }
+
+                const diff = xmasTarget - now;
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
+                document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
+                document.getElementById('cd-minutes').innerText = String(minutes).padStart(2, '0');
+                document.getElementById('cd-seconds').innerText = String(seconds).padStart(2, '0');
+            }
+
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        /* CARGAR Y GUARDAR LOCALSTORAGE */
+        function loadLocalStorageData() {
+            const savedUser = localStorage.getItem('xmas_office_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+            }
+
+            const savedLeaderboard = localStorage.getItem('xmas_office_leaderboard');
+            if (savedLeaderboard) {
+                leaderboardData = JSON.parse(savedLeaderboard);
+            } else {
+                leaderboardData = [
+                    { id: 'u1', name: 'Laura M.', avatar: '🤶', game1: 1200, game2: 450, game3: 850, total: 2500 },
+                    { id: 'u2', name: 'Roberto K.', avatar: '🦌', game1: 950, game2: 600, game3: 720, total: 2270 },
+                    { id: 'u3', name: 'Alex S.', avatar: '🧝', game1: 1100, game2: 300, game3: 650, total: 2050 }
+                ];
+                saveLeaderboardToStorage();
+            }
+        }
+
+        function saveLeaderboardToStorage() {
+            localStorage.setItem('xmas_office_leaderboard', JSON.stringify(leaderboardData));
+        }
+
+        /* SELECCIÓN DE AVATAR */
+        function renderAvatarSelector() {
+            const container = document.getElementById('avatar-selector');
+            container.innerHTML = '';
+            AVATARS.forEach(av => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `flex flex-col items-center justify-center p-2 rounded-xl border transition ${selectedAvatar === av.emoji ? 'bg-xmas-gold/30 border-xmas-gold scale-105' : 'bg-slate-900 border-white/10 hover:bg-slate-800'}`;
+                btn.innerHTML = `<span class="text-2xl">${av.emoji}</span><span class="text-[9px] text-slate-300 font-bold mt-1">${av.name}</span>`;
+                btn.onclick = () => {
+                    selectedAvatar = av.emoji;
+                    renderAvatarSelector();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        /* VALIDACIÓN DE NOMBRES DUPLICADOS */
+        function validateNameInput() {
+            const inputVal = document.getElementById('input-name').value.trim();
+            const normalizedInput = inputVal.toLowerCase();
+            const warningEl = document.getElementById('duplicate-warning');
+            const submitBtn = document.getElementById('btn-save-profile');
+
+            if (!inputVal) {
+                warningEl.classList.add('hidden');
+                submitBtn.disabled = true;
+                return false;
+            }
+
+            // Comprobar si existe en el leaderboard asignado a otro ID
+            const isDuplicate = leaderboardData.some(u => 
+                u.name.trim().toLowerCase() === normalizedInput && 
+                (!currentUser || u.id !== currentUser.id)
+            );
+
+            if (isDuplicate) {
+                warningEl.classList.remove('hidden');
+                submitBtn.disabled = true;
+                return false;
+            } else {
+                warningEl.classList.add('hidden');
+                submitBtn.disabled = false;
+                return true;
+            }
+        }
+
+        function openProfileModal() {
+            if (currentUser) {
+                document.getElementById('input-name').value = currentUser.name;
+                selectedAvatar = currentUser.avatar;
+                renderAvatarSelector();
+            }
+            validateNameInput();
+            document.getElementById('modal-profile').classList.remove('hidden');
+        }
+
+        function saveProfile(e) {
+            e.preventDefault();
+            if (!validateNameInput()) return;
+
+            const name = document.getElementById('input-name').value.trim();
+
+            if (!currentUser) {
+                currentUser = {
+                    id: 'usr_' + Date.now(),
+                    name: name,
+                    avatar: selectedAvatar,
+                    game1: 0,
+                    game2: 0,
+                    game3: 0,
+                    total: 0
+                };
+            } else {
+                currentUser.name = name;
+                currentUser.avatar = selectedAvatar;
+            }
+
+            localStorage.setItem('xmas_office_user', JSON.stringify(currentUser));
+            updateUserInLeaderboard();
+
+            document.getElementById('modal-profile').classList.add('hidden');
+            updateUIHeader();
+            renderLeaderboard();
+            updateDashboardScores();
+        }
+
+        function updateUserInLeaderboard() {
+            if (!currentUser) return;
+            currentUser.total = (currentUser.game1 || 0) + (currentUser.game2 || 0) + (currentUser.game3 || 0);
+
+            const idx = leaderboardData.findIndex(u => u.id === currentUser.id);
+            if (idx >= 0) {
+                leaderboardData[idx] = { ...currentUser };
+            } else {
+                leaderboardData.push({ ...currentUser });
+            }
+
+            saveLeaderboardToStorage();
+        }
+
+        function updateUIHeader() {
+            if (!currentUser) return;
+            document.getElementById('user-header-info').classList.remove('hidden');
+            document.getElementById('header-avatar').innerText = currentUser.avatar;
+            document.getElementById('header-name').innerText = currentUser.name;
+            document.getElementById('header-score').innerText = currentUser.total;
+        }
+
+        function updateDashboardScores() {
+            if (!currentUser) return;
+            document.getElementById('record-game1').innerText = `${currentUser.game1 || 0} pts`;
+            document.getElementById('record-game2').innerText = `${currentUser.game2 || 0} pts`;
+            document.getElementById('record-game3').innerText = `${currentUser.game3 || 0} pts`;
+        }
+
+        /* ==========================================
+           3. LEADERBOARD & EXPORTACIÓN
+        ========================================== */
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-body');
+            let sorted = [...leaderboardData].sort((a, b) => b.total - a.total);
+
+            tbody.innerHTML = '';
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Aún no hay participantes en la tabla.</td></tr>`;
+                return;
+            }
+
+            sorted.forEach((user, index) => {
+                const tr = document.createElement('tr');
+                const isMe = currentUser && user.id === currentUser.id;
+                tr.className = `hover:bg-white/5 transition ${isMe ? 'bg-amber-500/20 border-l-4 border-xmas-gold' : ''}`;
+
+                let rankBadge = `<span class="font-bold text-slate-400 ml-2">#${index + 1}</span>`;
+                if (index === 0) rankBadge = `<span class="bg-amber-400 text-slate-950 font-black px-2.5 py-0.5 rounded-full text-[10px] shadow">🥇 Oro</span>`;
+                else if (index === 1) rankBadge = `<span class="bg-slate-300 text-slate-950 font-black px-2.5 py-0.5 rounded-full text-[10px] shadow">🥈 Plata</span>`;
+                else if (index === 2) rankBadge = `<span class="bg-amber-700 text-white font-black px-2.5 py-0.5 rounded-full text-[10px] shadow">🥉 Bronce</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-3.5">${rankBadge}</td>
+                    <td class="p-3.5 font-bold text-white flex items-center gap-2">
+                        <span class="text-xl">${user.avatar || '🎅'}</span>
+                        <span>${user.name}</span>
+                        ${isMe ? '<span class="text-[9px] bg-xmas-red text-white px-1.5 py-0.2 rounded font-bold">TÚ</span>' : ''}
+                    </td>
+                    <td class="p-3.5 text-center text-slate-300 font-mono">${user.game1 || 0}</td>
+                    <td class="p-3.5 text-center text-slate-300 font-mono">${user.game2 || 0}</td>
+                    <td class="p-3.5 text-center text-slate-300 font-mono">${user.game3 || 0}</td>
+                    <td class="p-3.5 text-right font-black text-xmas-gold text-sm font-mono">${user.total || 0} pts</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportLeaderboardCSV() {
+            let csv = "Lugar,Nombre,Sopa de Letras,Rompeladrillos,Trivia,Puntaje Total\n";
+            let sorted = [...leaderboardData].sort((a, b) => b.total - a.total);
+
+            sorted.forEach((u, i) => {
+                csv += `"${i+1}","${u.name}",${u.game1||0},${u.game2||0},${u.game3||0},${u.total||0}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Ranking_Olimpiadas_Navidenas.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportLeaderboardJSON() {
+            let sorted = [...leaderboardData].sort((a, b) => b.total - a.total);
+            const jsonStr = JSON.stringify(sorted, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Ranking_Olimpiadas_Navidenas.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        /* ==========================================
+           4. CONTROLADOR GENERAL DE NAVEGACIÓN
+        ========================================== */
+        function startGame(gameId) {
+            if (!currentUser) {
+                openProfileModal();
+                return;
+            }
+
+            currentGameId = gameId;
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-game').classList.remove('hidden');
+            document.getElementById('view-game').classList.add('flex');
+            document.getElementById('game-overlay').classList.add('hidden');
+
+            const mainCanvas = document.getElementById('main-game-canvas');
+            const htmlArea = document.getElementById('html-game-area');
+            const mobileControls = document.getElementById('mobile-controls');
+
+            htmlArea.innerHTML = '';
+            mobileControls.classList.add('hidden');
+            mobileControls.classList.remove('grid');
+
+            const titles = {
+                1: "🔤 Sopa de Letras Navideña (Nivel Difícil)",
+                2: "🎄 Rompeladrillos de Nochebuena",
+                3: "🧠 Trivia Festiva & Oficina"
+            };
+            document.getElementById('game-title').innerText = titles[gameId];
+            document.getElementById('game-score').innerText = '0';
+
+            if (gameLoopReq) cancelAnimationFrame(gameLoopReq);
+
+            if (gameId === 1) {
+                mainCanvas.classList.add('hidden');
+                htmlArea.classList.remove('hidden');
+                initWordSearchGame();
+            } else if (gameId === 2) {
+                mainCanvas.classList.remove('hidden');
+                htmlArea.classList.add('hidden');
+                if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                    mobileControls.classList.remove('hidden');
+                    mobileControls.classList.add('grid');
+                }
+                initBreakoutGame();
+            } else if (gameId === 3) {
+                mainCanvas.classList.add('hidden');
+                htmlArea.classList.remove('hidden');
+                initTriviaGame();
+            }
+        }
+
+        function exitGame() {
+            if (gameLoopReq) cancelAnimationFrame(gameLoopReq);
+            if (wordSearchTimer) clearInterval(wordSearchTimer);
+            document.getElementById('view-game').classList.add('hidden');
+            document.getElementById('view-game').classList.remove('flex');
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            updateUIHeader();
+            renderLeaderboard();
+            updateDashboardScores();
+        }
+
+        function finishGame(score) {
+            if (gameLoopReq) cancelAnimationFrame(gameLoopReq);
+            if (wordSearchTimer) clearInterval(wordSearchTimer);
+
+            const prevRecord = currentUser[`game${currentGameId}`] || 0;
+            const isNewRecord = score > prevRecord;
+
+            if (isNewRecord) {
+                currentUser[`game${currentGameId}`] = score;
+                updateUserInLeaderboard();
+                confetti({ particleCount: 130, spread: 85, origin: { y: 0.6 } });
+                playSuccessJingle();
+            }
+
+            document.getElementById('gameover-score').innerText = score;
+            document.getElementById('gameover-prev-record').innerText = prevRecord;
+
+            const badge = document.getElementById('gameover-newrecord-badge');
+            if (isNewRecord) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+
+            document.getElementById('modal-gameover').classList.remove('hidden');
+        }
+
+        function retryCurrentGame() {
+            document.getElementById('modal-gameover').classList.add('hidden');
+            startGame(currentGameId);
+        }
+
+        function closeGameOverAndGoMenu() {
+            document.getElementById('modal-gameover').classList.add('hidden');
+            exitGame();
+        }
+
+        /* ==========================================
+           5. MINIJUEGO 1: SOPA DE LETRAS (14x14 DIFÍCIL)
+        ========================================== */
+        const WORD_SEARCH_WORDS = [
+            "GUIRNALDA", "CASCANUECES", "VILLANCICO", "MUERDAGO", 
+            "NATIVIDAD", "ESCARCHA", "PESEBRE", "ZAMBOMBA", 
+            "ALMENDRADO", "NOCHEBUENA"
+        ];
+
+        let wordSearchGrid = [];
+        let wordSearchPlacements = [];
+        let wordSearchFound = [];
+        let wordSearchSelection = [];
+        let wordSearchTimer = null;
+        let wordSearchTimeLeft = 180;
+        let wordSearchScore = 0;
+        let isSelectingWord = false;
+
+        function initWordSearchGame() {
+            const htmlArea = document.getElementById('html-game-area');
+            const SIZE = 14;
+            wordSearchGrid = Array(SIZE).fill(null).map(() => Array(SIZE).fill(''));
+            wordSearchPlacements = [];
+            wordSearchFound = [];
+            wordSearchSelection = [];
+            wordSearchTimeLeft = 180;
+            wordSearchScore = 0;
+
+            const directions = [
+                { r: 0, c: 1 }, { r: 0, c: -1 },   // Horizontal
+                { r: 1, c: 0 }, { r: -1, c: 0 },   // Vertical
+                { r: 1, c: 1 }, { r: 1, c: -1 },   // Diagonales
+                { r: -1, c: 1 }, { r: -1, c: -1 }  // Diagonales inversas
+            ];
+
+            WORD_SEARCH_WORDS.forEach(word => {
+                let placed = false;
+                let attempts = 0;
+                while (!placed && attempts < 300) {
+                    attempts++;
+                    const dir = directions[Math.floor(Math.random() * directions.length)];
+                    const startR = Math.floor(Math.random() * SIZE);
+                    const startC = Math.floor(Math.random() * SIZE);
+
+                    const endR = startR + dir.r * (word.length - 1);
+                    const endC = startC + dir.c * (word.length - 1);
+
+                    if (endR >= 0 && endR < SIZE && endC >= 0 && endC < SIZE) {
+                        let canPlace = true;
+                        for (let i = 0; i < word.length; i++) {
+                            const r = startR + dir.r * i;
+                            const c = startC + dir.c * i;
+                            if (wordSearchGrid[r][c] !== '' && wordSearchGrid[r][c] !== word[i]) {
+                                canPlace = false;
+                                break;
+                            }
+                        }
+
+                        if (canPlace) {
+                            const cells = [];
+                            for (let i = 0; i < word.length; i++) {
+                                const r = startR + dir.r * i;
+                                const c = startC + dir.c * i;
+                                wordSearchGrid[r][c] = word[i];
+                                cells.push({ r, c });
+                            }
+                            wordSearchPlacements.push({ word, cells });
+                            placed = true;
+                        }
+                    }
+                }
+            });
+
+            // Rellenar celdas vacías
+            const alphabet = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    if (wordSearchGrid[r][c] === '') {
+                        wordSearchGrid[r][c] = alphabet[Math.floor(Math.random() * alphabet.length)];
+                    }
+                }
+            }
+
+            htmlArea.innerHTML = `
+                <div class="w-full flex flex-col items-center gap-4">
+                    <div class="flex justify-between items-center w-full max-w-lg bg-slate-900/90 p-2.5 px-4 rounded-xl border border-white/10 text-xs font-bold">
+                        <span class="text-emerald-300">Progreso: <span id="ws-count" class="text-white font-black text-sm">0/10</span></span>
+                        <span id="ws-timer" class="bg-xmas-red text-white px-2.5 py-1 rounded-lg font-mono">⏱️ 03:00</span>
+                    </div>
+
+                    <div id="ws-grid" class="wordsearch-grid w-full max-w-[440px] bg-slate-950 p-2 rounded-2xl border border-white/10 shadow-2xl">
+                    </div>
+
+                    <div class="w-full max-w-lg bg-slate-900/60 p-3 rounded-xl border border-white/10">
+                        <h4 class="text-xs font-bold text-amber-300 mb-2 uppercase tracking-wider text-left">Palabras a encontrar:</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] font-semibold text-left">
+                            ${WORD_SEARCH_WORDS.map(w => `<span id="word-item-${w}" class="word-item bg-slate-800/80 px-2 py-1 rounded border border-white/5 text-slate-200">🔍 ${w}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const gridEl = document.getElementById('ws-grid');
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'word-cell';
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+                    cell.innerText = wordSearchGrid[r][c];
+
+                    cell.onmousedown = () => startSelection(r, c);
+                    cell.onmouseenter = () => updateSelection(r, c);
+                    cell.ontouchstart = (e) => { e.preventDefault(); startSelection(r, c); };
+
+                    gridEl.appendChild(cell);
+                }
+            }
+
+            document.onmouseup = () => endSelection();
+            gridEl.ontouchmove = (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (target && target.dataset.r !== undefined) {
+                    updateSelection(parseInt(target.dataset.r), parseInt(target.dataset.c));
+                }
+            };
+            gridEl.ontouchend = () => endSelection();
+
+            if (wordSearchTimer) clearInterval(wordSearchTimer);
+            wordSearchTimer = setInterval(() => {
+                wordSearchTimeLeft--;
+                const timerEl = document.getElementById('ws-timer');
+                if (timerEl) {
+                    const mins = String(Math.floor(wordSearchTimeLeft / 60)).padStart(2, '0');
+                    const secs = String(wordSearchTimeLeft % 60).padStart(2, '0');
+                    timerEl.innerText = `⏱️ ${mins}:${secs}`;
+                }
+
+                if (wordSearchTimeLeft <= 0) {
+                    clearInterval(wordSearchTimer);
+                    finishGame(wordSearchScore);
+                }
+            }, 1000);
+        }
+
+        function startSelection(r, c) {
+            isSelectingWord = true;
+            wordSearchSelection = [{ r, c }];
+            highlightSelection();
+        }
+
+        function updateSelection(r, c) {
+            if (!isSelectingWord) return;
+            const start = wordSearchSelection[0];
+            if (!start) return;
+
+            const dr = r - start.r;
+            const dc = c - start.c;
+
+            if (dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc)) {
+                const stepR = dr === 0 ? 0 : dr / Math.abs(dr);
+                const stepC = dc === 0 ? 0 : dc / Math.abs(dc);
+                const steps = Math.max(Math.abs(dr), Math.abs(dc));
+
+                wordSearchSelection = [];
+                for (let i = 0; i <= steps; i++) {
+                    wordSearchSelection.push({ r: start.r + stepR * i, c: start.c + stepC * i });
+                }
+                highlightSelection();
+            }
+        }
+
+        function highlightSelection() {
+            document.querySelectorAll('.word-cell').forEach(cell => {
+                if (!cell.classList.contains('found')) cell.classList.remove('selected');
+            });
+
+            wordSearchSelection.forEach(pos => {
+                const cell = document.querySelector(`.word-cell[data-r="${pos.r}"][data-c="${pos.c}"]`);
+                if (cell && !cell.classList.contains('found')) cell.classList.add('selected');
+            });
+        }
+
+        function endSelection() {
+            if (!isSelectingWord) return;
+            isSelectingWord = false;
+
+            let matchedPlacement = null;
+            wordSearchPlacements.forEach(p => {
+                if (wordSearchFound.includes(p.word)) return;
+
+                if (p.cells.length === wordSearchSelection.length) {
+                    const forwardMatch = p.cells.every((cell, idx) => cell.r === wordSearchSelection[idx].r && cell.c === wordSearchSelection[idx].c);
+                    const backwardMatch = p.cells.every((cell, idx) => {
+                        const revIdx = wordSearchSelection.length - 1 - idx;
+                        return cell.r === wordSearchSelection[revIdx].r && cell.c === wordSearchSelection[revIdx].c;
+                    });
+
+                    if (forwardMatch || backwardMatch) matchedPlacement = p;
+                }
+            });
+
+            if (matchedPlacement) {
+                wordSearchFound.push(matchedPlacement.word);
+                wordSearchScore += 100;
+                playWordFoundSound();
+                document.getElementById('game-score').innerText = wordSearchScore;
+                document.getElementById('ws-count').innerText = `${wordSearchFound.length}/10`;
+
+                matchedPlacement.cells.forEach(pos => {
+                    const cell = document.querySelector(`.word-cell[data-r="${pos.r}"][data-c="${pos.c}"]`);
+                    if (cell) {
+                        cell.classList.remove('selected');
+                        cell.classList.add('found');
+                    }
+                });
+
+                const wordEl = document.getElementById(`word-item-${matchedPlacement.word}`);
+                if (wordEl) wordEl.classList.add('found-word');
+
+                if (wordSearchFound.length === WORD_SEARCH_WORDS.length) {
+                    const bonusSpeed = wordSearchTimeLeft * 3;
+                    wordSearchScore += bonusSpeed;
+                    document.getElementById('game-score').innerText = wordSearchScore;
+                    clearInterval(wordSearchTimer);
+                    setTimeout(() => finishGame(wordSearchScore), 500);
+                }
+            } else {
+                document.querySelectorAll('.word-cell').forEach(cell => {
+                    if (!cell.classList.contains('found')) cell.classList.remove('selected');
+                });
+            }
+
+            wordSearchSelection = [];
+        }
+
+        /* ==========================================
+           6. MINIJUEGO 2: ROMPELADRILLOS (NIVELES PROGRESIVOS)
+        ========================================== */
+        function initBreakoutGame() {
+            const canvas = document.getElementById('main-game-canvas');
+            const ctx = canvas.getContext('2d');
+
+            let currentLevel = 1;
+            let score = 0;
+            const paddleHeight = 12;
+            let paddleWidth = 90;
+            let paddleX = (canvas.width - paddleWidth) / 2;
+
+            let x = canvas.width / 2;
+            let y = canvas.height - 40;
+            let baseSpeed = 3.2;
+            let dx = baseSpeed;
+            let dy = -baseSpeed;
+            const ballRadius = 8;
+
+            let rightPressed = false;
+            let leftPressed = false;
+
+            const brickRowCount = 6;
+            const brickColumnCount = 7;
+            const brickWidth = 56;
+            const brickHeight = 20;
+            const brickPadding = 8;
+            const brickOffsetTop = 45;
+            const brickOffsetLeft = 28;
+
+            let bricks = [];
+
+            function createTreeBricks() {
+                bricks = [];
+                for (let c = 0; c < brickColumnCount; c++) {
+                    bricks[c] = [];
+                    for (let r = 0; r < brickRowCount; r++) {
+                        let active = true;
+                        // Formación en árbol de navidad
+                        if (r === 0 && (c < 3 || c > 3)) active = false; // Estrella / Copa
+                        if (r === 1 && (c < 2 || c > 4)) active = false;
+                        if (r === 2 && (c < 1 || c > 5)) active = false;
+                        // Nivel 5 es el tronco
+
+                        bricks[c][r] = { x: 0, y: 0, status: active ? 1 : 0 };
+                    }
+                }
+            }
+
+            createTreeBricks();
+
+            window.onkeydown = (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'd') rightPressed = true;
+                if (e.key === 'ArrowLeft' || e.key === 'a') leftPressed = true;
+            };
+            window.onkeyup = (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'd') rightPressed = false;
+                if (e.key === 'ArrowLeft' || e.key === 'a') leftPressed = false;
+            };
+
+            canvas.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const relativeX = e.clientX - rect.left;
+                if (relativeX > 0 && relativeX < canvas.width) {
+                    paddleX = relativeX - paddleWidth / 2;
+                }
+            };
+
+            const btnLeft = document.getElementById('btn-touch-left');
+            const btnRight = document.getElementById('btn-touch-right');
+            btnLeft.ontouchstart = (e) => { e.preventDefault(); leftPressed = true; };
+            btnLeft.ontouchend = (e) => { e.preventDefault(); leftPressed = false; };
+            btnRight.ontouchstart = (e) => { e.preventDefault(); rightPressed = true; };
+            btnRight.ontouchend = (e) => { e.preventDefault(); rightPressed = false; };
+
+            function collisionDetection() {
+                let activeBricks = 0;
+                for (let c = 0; c < brickColumnCount; c++) {
+                    for (let r = 0; r < brickRowCount; r++) {
+                        const b = bricks[c][r];
+                        if (b.status === 1) {
+                            activeBricks++;
+                            if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                                dy = -dy;
+                                b.status = 0;
+                                score += 20 * currentLevel;
+                                playBrickHitSound();
+                                document.getElementById('game-score').innerText = score;
+                            }
+                        }
+                    }
+                }
+
+                // Avance de nivel al limpiar ladrillos
+                if (activeBricks === 0) {
+                    currentLevel++;
+                    score += 150 * currentLevel;
+                    document.getElementById('game-score').innerText = score;
+
+                    baseSpeed += 0.7;
+                    dx = Math.sign(dx) * baseSpeed;
+                    dy = -baseSpeed;
+                    x = canvas.width / 2;
+                    y = canvas.height - 40;
+                    paddleX = (canvas.width - paddleWidth) / 2;
+                    createTreeBricks();
+                }
+            }
+
+            function drawBall() {
+                ctx.beginPath();
+                ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFB703';
+                ctx.fill();
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.closePath();
+            }
+
+            function drawPaddle() {
+                ctx.beginPath();
+                ctx.roundRect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight, 6);
+                ctx.fillStyle = '#D62828';
+                ctx.fill();
+                ctx.strokeStyle = '#FEFAE0';
+                ctx.stroke();
+                ctx.closePath();
+            }
+
+            function drawBricks() {
+                for (let c = 0; c < brickColumnCount; c++) {
+                    for (let r = 0; r < brickRowCount; r++) {
+                        if (bricks[c][r].status === 1) {
+                            const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+                            const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+                            bricks[c][r].x = brickX;
+                            bricks[c][r].y = brickY;
+
+                            ctx.beginPath();
+                            ctx.roundRect(brickX, brickY, brickWidth, brickHeight, 4);
+                            
+                            if (r === 5) ctx.fillStyle = '#8B4513'; // Tronco
+                            else if (r === 0) ctx.fillStyle = '#FFB703'; // Estrella
+                            else ctx.fillStyle = (r % 2 === 0) ? '#2D6A4F' : '#1B4332';
+                            
+                            ctx.fill();
+                            ctx.strokeStyle = '#FFB703';
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                            ctx.closePath();
+                        }
+                    }
+                }
+            }
+
+            function drawHUD() {
+                ctx.font = 'bold 12px Outfit, sans-serif';
+                ctx.fillStyle = '#FFB703';
+                ctx.fillText(`NIVEL ${currentLevel}`, 15, 25);
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawHUD();
+                drawBricks();
+                drawBall();
+                drawPaddle();
+                collisionDetection();
+
+                if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+                if (y + dy < ballRadius) dy = -dy;
+                else if (y + dy > canvas.height - ballRadius - 15) {
+                    if (x > paddleX && x < paddleX + paddleWidth) {
+                        dy = -dy;
+                    } else if (y + dy > canvas.height - ballRadius) {
+                        finishGame(score);
+                        return;
+                    }
+                }
+
+                if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 6;
+                else if (leftPressed && paddleX > 0) paddleX -= 6;
+
+                x += dx;
+                y += dy;
+
+                gameLoopReq = requestAnimationFrame(draw);
+            }
+
+            draw();
+        }
+
+        /* ==========================================
+           7. MINIJUEGO 3: TRIVIA FESTIVA (10 PREGUNTAS)
+        ========================================== */
+        const TRIVIA_QUESTIONS = [
+            {
+                q: "¿En qué país nació la tradición de decorar el Árbol de Navidad?",
+                options: ["Alemania", "Estados Unidos", "Francia", "Italia"],
+                correct: 0
+            },
+            {
+                q: "Un compañero dejó el refrigerador de la oficina abierto antes del convivio. ¿Qué se hace?",
+                options: ["Lo cerramos y le enviamos un sticker divertido", "Nos comemos su almuerzo", "Llamamos a Sistemas", "Apagamos la luz"],
+                correct: 0
+            },
+            {
+                q: "¿Cuál es la película navideña clásica protagonizada por un niño que se queda solo en casa?",
+                options: ["Mi Pobre Angelito (Home Alone)", "El Grinch", "El Expreso Polar", "Santa Cláusula"],
+                correct: 0
+            },
+            {
+                q: "¿Qué flor de color rojo intenso es el símbolo por excelencia de las fiestas navideñas?",
+                options: ["Nochebuena (Poinsettia)", "Girasol", "Orquídea", "Rosa Holandesa"],
+                correct: 0
+            },
+            {
+                q: "En el juego del 'Intercambio Navideño' de la oficina, ¿cuál es la regla de oro?",
+                options: ["Respetar el presupuesto acordado", "Regalar una pluma usada", "Revelar tu nombre el primer día", "No asistir a la fiesta"],
+                correct: 0
+            },
+            {
+                q: "¿Cómo se llama el reno de Santa Claus que tiene la nariz brillante y roja?",
+                options: ["Rodolfo (Rudolph)", "Cometa", "Cupido", "Trueno"],
+                correct: 0
+            },
+            {
+                q: "¿Qué bebida festiva tradicional se prepara con frutas de temporada, caña y canela?",
+                options: ["Ponche de Frutas", "Malteada de Fresa", "Té helado", "Limonada mineral"],
+                correct: 0
+            },
+            {
+                q: "Cuando alguien dice en diciembre 'este correo pudo haber sido una junta', la respuesta festiva es:",
+                options: ["Sonreír e ir por un buñuelo/galleta", "Escribir un correo más largo", "Apagar el monitor", "Organizar otra junta"],
+                correct: 0
+            },
+            {
+                q: "¿Qué villancico tradicional menciona a una marimorena y una pandereta?",
+                options: ["La Marimorena", "Campana sobre Campana", "Noche de Paz", "El Tamborilero"],
+                correct: 0
+            },
+            {
+                q: "¿En qué fecha exacta se celebra la Nochebuena?",
+                options: ["24 de Diciembre", "25 de Diciembre", "31 de Diciembre", "6 de Enero"],
+                correct: 0
+            }
+        ];
+
+        let triviaState = {};
+
+        function initTriviaGame() {
+            const overlay = document.getElementById('game-overlay');
+            overlay.classList.remove('hidden');
+
+            triviaState = {
+                currentQIndex: 0,
+                score: 0,
+                timeLeft: 12,
+                timer: null,
+                questions: [...TRIVIA_QUESTIONS].sort(() => Math.random() - 0.5)
+            };
+
+            renderTriviaQuestion();
+        }
+
+        function renderTriviaQuestion() {
+            if (triviaState.currentQIndex >= triviaState.questions.length) {
+                finishGame(triviaState.score);
+                return;
+            }
+
+            const q = triviaState.questions[triviaState.currentQIndex];
+            triviaState.timeLeft = 12;
+
+            const overlay = document.getElementById('game-overlay');
+            overlay.innerHTML = `
+                <div class="w-full max-w-lg">
+                    <div class="flex justify-between items-center mb-3 text-xs text-amber-300 font-bold">
+                        <span>Pregunta ${triviaState.currentQIndex + 1} de 10</span>
+                        <span id="trivia-timer" class="bg-xmas-red text-white px-2.5 py-1 rounded-md font-mono">⏱️ 12s</span>
+                    </div>
+
+                    <!-- Barra de Avance -->
+                    <div class="w-full bg-slate-800 h-2 rounded-full mb-6 overflow-hidden border border-white/10">
+                        <div class="bg-xmas-gold h-full transition-all duration-300" style="width: ${((triviaState.currentQIndex + 1) / 10) * 100}%"></div>
+                    </div>
+
+                    <h3 class="text-base md:text-lg font-extrabold text-white mb-6 text-left">${q.q}</h3>
+
+                    <div class="grid grid-cols-1 gap-3 text-left" id="trivia-options">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="answerTrivia(${i})" class="bg-slate-800 hover:bg-emerald-700/60 border border-white/10 hover:border-xmas-gold p-3 rounded-xl text-xs font-semibold text-slate-100 transition flex items-center gap-3">
+                                <span class="bg-slate-900 text-amber-400 w-6 h-6 flex items-center justify-center rounded-lg font-bold">${String.fromCharCode(65 + i)}</span>
+                                <span>${opt}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            clearInterval(triviaState.timer);
+            triviaState.timer = setInterval(() => {
+                triviaState.timeLeft--;
+                const timerEl = document.getElementById('trivia-timer');
+                if (timerEl) timerEl.innerText = `⏱️ ${triviaState.timeLeft}s`;
+
+                if (triviaState.timeLeft <= 0) {
+                    clearInterval(triviaState.timer);
+                    answerTrivia(-1);
+                }
+            }, 1000);
+        }
+
+        function answerTrivia(selectedIndex) {
+            clearInterval(triviaState.timer);
+            const q = triviaState.questions[triviaState.currentQIndex];
+
+            if (selectedIndex === q.correct) {
+                const bonusSpeed = triviaState.timeLeft * 5;
+                triviaState.score += 100 + bonusSpeed;
+                playSynthSound(600, 'sine', 0.1, 0.1);
+                document.getElementById('game-score').innerText = triviaState.score;
+            } else {
+                playSynthSound(200, 'sawtooth', 0.15, 0.1);
+            }
+
+            triviaState.currentQIndex++;
+            renderTriviaQuestion();
+        }
+
+        /* ==========================================
+           8. ANIMACIÓN DE NIEVE EN CANVAS
+        ========================================== */
+        function initSnowEffect() {
+            const canvas = document.getElementById('snow-canvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            const numFlakes = 65;
+            const flakes = [];
+
+            for (let i = 0; i < numFlakes; i++) {
+                flakes.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    r: Math.random() * 3 + 1,
+                    d: Math.random() * 1 + 0.5
+                });
+            }
+
+            function drawSnow() {
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+                ctx.beginPath();
+                for (let i = 0; i < numFlakes; i++) {
+                    const f = flakes[i];
+                    ctx.moveTo(f.x, f.y);
+                    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
+                }
+                ctx.fill();
+
+                for (let i = 0; i < numFlakes; i++) {
+                    const f = flakes[i];
+                    f.y += Math.pow(f.d, 2) + 1;
+                    f.x += Math.sin(f.y / 30);
+
+                    if (f.y > height) {
+                        flakes[i] = { x: Math.random() * width, y: 0, r: f.r, d: f.d };
+                    }
+                }
+                requestAnimationFrame(drawSnow);
+            }
+
+            window.onresize = () => {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            };
+
+            drawSnow();
+        }
+    </script>
+</body>
+</html>
